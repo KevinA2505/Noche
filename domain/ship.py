@@ -1,6 +1,7 @@
 import pygame
 from math import radians
 
+
 class Ship(pygame.sprite.Sprite):
     """
     Nave con deriva e inercia.
@@ -26,10 +27,10 @@ class Ship(pygame.sprite.Sprite):
         # ─ Cinemática ───────────────────────────────────────────────────
         self.pos = pygame.Vector2(pos)
         self.vel = pygame.Vector2(0, 0)
-        self.angle = 0.0          # 0° ≡ norte (-Y)
+        self.angle = 0.0  # 0° ≡ norte (-Y)
 
         # ─ Parámetros de control ────────────────────────────────────────
-        self.rotation_speed = 180          # grados/segundo
+        self.rotation_speed = 180  # grados/segundo
         self.thrust = 0.2
         self.max_speed = max_speed
         self.friction = friction
@@ -53,7 +54,7 @@ class Ship(pygame.sprite.Sprite):
     # ─ Lógica interna ──────────────────────────────────────────────────
     def _handle_input(self, dt: float) -> None:
         keys = pygame.key.get_pressed()
-        
+
         if keys[pygame.K_a]:
             self.angle -= self.rotation_speed * dt
         if keys[pygame.K_d]:
@@ -91,10 +92,17 @@ class Ship(pygame.sprite.Sprite):
     def _draw_trail(self, surface: pygame.Surface) -> None:
         for pos, life in self.trail:
             alpha = int(255 * (life / self.trail_max_life))
-            radius = 4 + 8 * (life / self.trail_max_life)
-            bubble = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
-            pygame.draw.circle(bubble, (255, 160, 40, alpha), (radius, radius), radius)
-            surface.blit(bubble, (pos.x - radius, pos.y - radius))
+            radius = 3 + 6 * (life / self.trail_max_life)
+            size = int(radius * 4)
+            bubble = pygame.Surface((size, size), pygame.SRCALPHA)
+            center = size // 2
+            outer_color = (180, 200, 255, alpha // 2)
+            inner_color = (255, 255, 255, alpha)
+            pygame.draw.circle(bubble, outer_color, (center, center), center)
+            pygame.draw.circle(bubble, inner_color, (center, center), int(radius))
+            surface.blit(
+                bubble, (pos.x - center, pos.y - center), special_flags=pygame.BLEND_ADD
+            )
 
     def _apply_rotation(self) -> None:
         # Rotozoom gira antihorario; pasamos –angle para que el sprite apunte a “angle”
@@ -104,6 +112,6 @@ class Ship(pygame.sprite.Sprite):
     # ─ Utilidades ──────────────────────────────────────────────────────
     @staticmethod
     def _create_default_image() -> pygame.Surface:
-        surf = pygame.Surface((40, 60), pygame.SRCALPHA)
-        pygame.draw.polygon(surf, (200, 220, 255), [(20, 0), (0, 60), (40, 60)])
+        surf = pygame.Surface((20, 30), pygame.SRCALPHA)
+        pygame.draw.polygon(surf, (200, 220, 255), [(10, 0), (0, 30), (20, 30)])
         return surf
